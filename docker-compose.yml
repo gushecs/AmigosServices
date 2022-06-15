@@ -1,0 +1,158 @@
+services:
+
+  dbcustomer:
+    container_name: dbcustomer
+    image: postgres
+    environment:
+      POSTGRES_USER: amigoscode
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: customer
+    ports:
+      - "5429:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  dbfraud:
+    container_name: dbfraud
+    image: postgres
+    environment:
+      POSTGRES_USER: amigoscode
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fraud
+    ports:
+      - "5431:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  dbnotification:
+    container_name: dbnotification
+    image: postgres
+    environment:
+      POSTGRES_USER: amigoscode
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: notification
+    ports:
+      - "5430:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-random@email.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-123456}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - spring
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.9.11-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - spring
+
+  eureka-server:
+    image: gushecs/eureka_server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - zipkin
+    networks:
+      - spring
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  api-gw:
+    image: gushecs/api_gw:latest
+    container_name: api-gw
+    ports:
+      - "8083:8083"
+    depends_on:
+      - zipkin
+      - eureka-server
+    networks:
+      - spring
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  customer:
+    image: gushecs/customer:latest
+    container_name: customer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zipkin
+      - eureka-server
+      - postgres
+    networks:
+      - spring
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  fraud:
+    image: gushecs/fraud:latest
+    container_name: fraud
+    ports:
+      - "8081:8081"
+    depends_on:
+      - zipkin
+      - eureka-server
+      - dbfraud
+    networks:
+      - spring
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  notification:
+    image: gushecs/notification:latest
+    container_name: notification
+    ports:
+      - "8082:8082"
+    depends_on:
+      - zipkin
+      - eureka-server
+      - dbnotification
+      - rabbitmq
+    networks:
+      - spring
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - MY_EMAIL_GMAIL=${MY_EMAIL_GMAIL}
+
+networks:
+  postgres:
+    driver: bridge
+  spring:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
+  dbfraud:
+  dbnotification:

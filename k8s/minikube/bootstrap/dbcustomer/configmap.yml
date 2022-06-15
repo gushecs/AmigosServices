@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbcustomer-config
+data:
+  POSTGRES_DB: customer
+  POSTGRES_USER: amigoscode
+  POSTGRES_PASSWORD: password

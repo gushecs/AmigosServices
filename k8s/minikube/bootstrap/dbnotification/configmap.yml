@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbnotification-config
+data:
+  POSTGRES_DB: notification
+  POSTGRES_USER: amigoscode
+  POSTGRES_PASSWORD: password

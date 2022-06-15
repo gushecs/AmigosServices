@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbfraud-config
+data:
+  POSTGRES_DB: fraud
+  POSTGRES_USER: amigoscode
+  POSTGRES_PASSWORD: password

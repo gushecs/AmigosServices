@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbnotification
+  labels:
+    app: dbnotification
+spec:
+  serviceName: dbnotification
+  replicas: 1
+  template:
+    metadata:
+      name: dbnotification
+      labels:
+        app: dbnotification
+    spec:
+      volumes:
+        - name: dbnotification
+          persistentVolumeClaim:
+            claimName: dbnotification-pc-volume-claim
+      containers:
+        - name: dbnotification
+          image: postgres
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: dbnotification
+          envFrom:
+            - configMapRef:
+                name: dbnotification-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: dbnotification

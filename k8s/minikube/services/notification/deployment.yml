@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  labels:
+    app: notification
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: notification
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          image: gushecs/notification:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: kube
+            - name: SENDGRID_API_KEY
+              value: --your SendGrid API key here--
+            - name: MY_EMAIL_GMAIL
+              value: --your email here--
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: notification

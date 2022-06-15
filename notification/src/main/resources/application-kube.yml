@@ -1,0 +1,41 @@
+#Configs to run the program in minikube using RabbitMQ (saving notification in DB)
+server:
+  port: 8082
+
+spring:
+  application:
+    name: notification
+  datasource:
+    username: 'amigoscode'
+    url: jdbc:postgresql://dbnotification:5432/notification
+    password: 'password'
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: 'true'
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: 'true'
+  zipkin:
+    base-url: http://zipkin:9411
+  rabbitmq:
+    addresses: rabbitmq:5672
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+    enabled: false
+
+rabbitmq:
+  exchanges:
+    internal: internal.exchange
+  queue:
+    notification: notification.queue
+  routing-keys:
+    internal-notification: internal.notification.routing-key
+
+sender: db

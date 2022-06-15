@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbfraud
+  labels:
+    app: dbfraud
+spec:
+  serviceName: dbfraud
+  replicas: 1
+  template:
+    metadata:
+      name: dbfraud
+      labels:
+        app: dbfraud
+    spec:
+      volumes:
+        - name: dbfraud
+          persistentVolumeClaim:
+            claimName: dbfraud-pc-volume-claim
+      containers:
+        - name: dbfraud
+          image: postgres
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: dbfraud
+          envFrom:
+            - configMapRef:
+                name: dbfraud-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: dbfraud

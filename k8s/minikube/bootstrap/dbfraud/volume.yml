@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: dbfraud-pc-volume
+  labels:
+    type: local
+    app: dbfraud
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /mnt/data/dbfraud
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dbfraud-pc-volume-claim
+  labels:
+    app: dbfraud
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
